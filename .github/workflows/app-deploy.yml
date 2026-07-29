@@ -1,0 +1,93 @@
+name: Application CI/CD (Build & Deploy)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "config/**"
+      - ".github/workflows/app-deploy.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "config/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: sre-takehome-demo-app
+  EKS_CLUSTER_NAME: dev
+  K8S_NAMESPACE: demo
+
+jobs:
+  build-and-test:
+    name: Build & Validate Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Local Docker Image (Validation)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          push: false
+          tags: ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+  deploy:
+    name: Build, Push to ECR & Deploy to EKS
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./app
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Update K8s kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Apply namespace and base configs
+          kubectl apply -f config/namespace.yaml
+          kubectl apply -f config/configmap.yaml
+
+          # Update deployment manifest with unique commit SHA tag and apply
+          sed -i "s|<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/$ECR_REPOSITORY:latest|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" config/deployment.yaml
+          kubectl apply -f config/deployment.yaml
+          kubectl apply -f config/service.yaml
+
+          # Wait for rollout completion
+          kubectl rollout status deployment/demo-app -n ${{ env.K8S_NAMESPACE }} --timeout=180s

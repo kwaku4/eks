@@ -1,0 +1,12 @@
+# Non-secret configuration. DB_HOST/DB_NAME come from Terraform outputs
+# (terraform output rds_endpoint / db_name) — replace the placeholders below,
+# or template this file in CI from `terraform output -json`.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-app-config
+  namespace: demo
+data:
+  DB_HOST: "REPLACE_WITH_terraform_output_rds_endpoint"
+  DB_PORT: "5432"
+  DB_NAME: "demoapp"
