@@ -16,6 +16,11 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "app_name" {
+  description = "Name of the application, used in resource naming"
+  type        = string
+}
+
 variable "project_name" {
   description = "Short project name used as a prefix for resource names"
   type        = string

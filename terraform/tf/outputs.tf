@@ -23,8 +23,8 @@ output "configure_kubectl" {
   value = "aws eks update-kubeconfig --name ${module.eks.cluster_name} --region ${var.aws_region}"
 }
 
-output "ecr_repository_url" {
-  description = "ECR repository URL for the demo application"
-  value       = aws_ecr_repository.demo_app.repository_url
-}
+# output "ecr_repository_url" {
+#   description = "ECR repository URL for the demo application"
+#   value       = aws_ecr_repository.demo_app.repository_url
+# }
 

@@ -6,8 +6,17 @@ variable "private_subnet_ids" {
   type = list(string)
 }
 
-variable "rds_security_group_id" {
+variable "vpc_id" {
   type = string
+}
+
+variable "node_security_group_id" {
+  type = string
+}
+
+variable "alert_email" {
+  type = string
+  default = ""
 }
 
 variable "db_engine_version" {

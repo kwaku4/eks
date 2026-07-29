@@ -14,6 +14,8 @@ inputs = {
   node_max_size       = 3
   node_capacity_type  = "ON_DEMAND"
 
+  app_name = "sre-takehome-demo-app"
+
   db_engine_version = "18.3"
   db_instance_class = "db.t4g.micro"
 
