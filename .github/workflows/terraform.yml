@@ -45,14 +45,14 @@ jobs:
         continue-on-error: true
 
       - name: Terragrunt init
-        run: terragrunt init
+        run: terragrunt init -input=false --terragrunt-non-interactive
 
       - name: Terragrunt validate
-        run: terragrunt validate
+        run: terragrunt validate --terragrunt-non-interactive
 
       - name: Terragrunt plan
         id: plan
-        run: terragrunt plan -no-color -input=false
+        run: terragrunt plan -no-color -input=false --terragrunt-non-interactive
         continue-on-error: true
 
       - name: Comment plan on PR
@@ -101,7 +101,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Terragrunt init
-        run: terragrunt init
+        run: terragrunt init -input=false --terragrunt-non-interactive
 
       - name: Terragrunt apply
-        run: terragrunt apply -auto-approve -input=false
+        run: terragrunt apply -auto-approve -input=false --terragrunt-non-interactive
