@@ -6,6 +6,9 @@
 #   public_subnets  = [for i in range(var.az_count) : cidrsubnet(var.vpc_cidr, 4, i)]
 #   private_subnets = [for i in range(var.az_count) : cidrsubnet(var.vpc_cidr, 4, i + var.az_count)]
 # }
+terraform {
+  backend "s3" {}
+}
 
 data "aws_availability_zones" "available" {
   state = "available"

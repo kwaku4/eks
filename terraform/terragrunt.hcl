@@ -9,16 +9,13 @@ locals {
 
 remote_state {
   backend = "s3"
-  generate = {
-    path      = "backend.tf"
-    if_exists = "overwrite_terragrunt"
-  }
+
   config = {
-    bucket         = "sre-takehome-tfstate-211125593418"
-    key            = "${path_relative_to_include()}/terraform.tfstate"
-    region         = local.environment_vars.aws_region
-    encrypt        = true
-    dynamodb_table = "sre-takehome-tf-locks"
+    bucket       = "sre-takehome-tfstate-323232"
+    key          = "${path_relative_to_include()}/terraform.tfstate"
+    region       = local.environment_vars.aws_region
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
