@@ -7,6 +7,6 @@ metadata:
   name: demo-app-config
   namespace: demo
 data:
-  DB_HOST: "REPLACE_WITH_terraform_output_rds_endpoint"
+  DB_HOST: "dev.cq3uueueyh0m.us-east-1.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "demoapp"

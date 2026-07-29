@@ -77,6 +77,17 @@ def index():
         return jsonify(error=str(exc)), 500
 
 
+@app.before_first_request
+def initialize_database():
+    for attempt in range(5):
+        try:
+            ensure_table()
+            break
+        except Exception:  # noqa: BLE001
+            log.warning("DB not ready yet at first request (attempt %s), retrying...", attempt + 1)
+            time.sleep(3)
+
+
 if __name__ == "__main__":
     # Retry table creation briefly in case the app starts before RDS is reachable.
     for attempt in range(5):

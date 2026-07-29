@@ -8,6 +8,7 @@ metadata:
     # reachable per the assignment requirement.
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-target-type: "ip"
 spec:
   type: LoadBalancer
   selector:
