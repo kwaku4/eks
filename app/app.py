@@ -56,9 +56,29 @@ def health():
         return jsonify(status="error", detail=str(exc)), 503
 
 
+table_initialized = False
+
+def ensure_table_once():
+    global table_initialized
+    if table_initialized:
+        return
+
+    for attempt in range(5):
+        try:
+            ensure_table()
+            table_initialized = True
+            return
+        except Exception:  # noqa: BLE001
+            log.warning("DB not ready yet (attempt %s), retrying...", attempt + 1)
+            time.sleep(3)
+
+    raise RuntimeError("Unable to initialize visits table")
+
+
 @app.route("/")
 def index():
     try:
+        ensure_table_once()
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO visits DEFAULT VALUES RETURNING id, visited_at;")
@@ -75,17 +95,6 @@ def index():
     except Exception as exc:  # noqa: BLE001
         log.exception("request failed")
         return jsonify(error=str(exc)), 500
-
-
-@app.before_first_request
-def initialize_database():
-    for attempt in range(5):
-        try:
-            ensure_table()
-            break
-        except Exception:  # noqa: BLE001
-            log.warning("DB not ready yet at first request (attempt %s), retrying...", attempt + 1)
-            time.sleep(3)
 
 
 if __name__ == "__main__":
