@@ -1,7 +1,6 @@
 resource "random_password" "master" {
-  length           = 24
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  length  = 24
+  special = false
 }
 
 resource "aws_db_subnet_group" "this" {
@@ -56,9 +55,7 @@ resource "aws_db_instance" "this" {
   }
 }
 
-# Store the generated credentials in Secrets Manager rather than in state
-# output files or the repo. The app reads this at deploy time to build its
-# Kubernetes Secret (see README "Wiring the app to RDS").
+
 resource "aws_secretsmanager_secret" "db_credentials" {
   name = "${var.name_prefix}/rds/master-creds"
 }

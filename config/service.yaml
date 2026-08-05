@@ -4,8 +4,6 @@ metadata:
   name: demo-app
   namespace: demo
   annotations:
-    # NLB instead of the older Classic ELB; internet-facing so the app is
-    # reachable per the assignment requirement.
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     service.beta.kubernetes.io/aws-load-balancer-target-type: "ip"

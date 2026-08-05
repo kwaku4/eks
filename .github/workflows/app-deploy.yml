@@ -22,6 +22,7 @@ env:
   ECR_REPOSITORY: sre-takehome-demo-app
   EKS_CLUSTER_NAME: dev
   K8S_NAMESPACE: demo
+  DB_SECRET_ID: dev/rds/master-creds
 
 jobs:
   build-and-test:
@@ -83,6 +84,19 @@ jobs:
           # Apply namespace and base configs
           kubectl apply -f config/namespace.yaml
           kubectl apply -f config/configmap.yaml
+
+          # Pull DB credentials from Secrets Manager and sync into a K8s Secret
+          CREDS=$(aws secretsmanager get-secret-value \
+            --secret-id "${{ env.DB_SECRET_ID }}" \
+            --query SecretString --output text)
+          DB_USER=$(echo "$CREDS" | jq -r .username)
+          DB_PASSWORD=$(echo "$CREDS" | jq -r .password)
+
+          kubectl create secret generic demo-app-db-credentials \
+            -n ${{ env.K8S_NAMESPACE }} \
+            --from-literal=DB_USER="$DB_USER" \
+            --from-literal=DB_PASSWORD="$DB_PASSWORD" \
+            --dry-run=client -o yaml | kubectl apply -f -
 
           # Update deployment manifest with unique commit SHA tag and apply
           sed -i "s|<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/$ECR_REPOSITORY:latest|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" config/deployment.yaml

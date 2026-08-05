@@ -1,11 +1,4 @@
-# locals {
-#   name_prefix  = "${var.project_name}-${var.environment}"
-#   cluster_name = "${local.name_prefix}-cluster"
 
-#   azs             = slice(data.aws_availability_zones.available.names, 0, var.az_count)
-#   public_subnets  = [for i in range(var.az_count) : cidrsubnet(var.vpc_cidr, 4, i)]
-#   private_subnets = [for i in range(var.az_count) : cidrsubnet(var.vpc_cidr, 4, i + var.az_count)]
-# }
 terraform {
   backend "s3" {}
 }

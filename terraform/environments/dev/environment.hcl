@@ -9,7 +9,7 @@ inputs = {
   private_subnets = ["10.10.3.0/24", "10.10.4.0/24"]
 
   node_instance_types = ["t3.small"]
-  node_desired_size   = 2
+  node_desired_size   = 1
   node_min_size       = 1
   node_max_size       = 3
   node_capacity_type  = "ON_DEMAND"

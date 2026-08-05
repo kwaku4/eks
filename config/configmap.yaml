@@ -1,6 +1,4 @@
-# Non-secret configuration. DB_HOST/DB_NAME come from Terraform outputs
-# (terraform output rds_endpoint / db_name) — replace the placeholders below,
-# or template this file in CI from `terraform output -json`.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:

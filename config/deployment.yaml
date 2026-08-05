@@ -17,8 +17,6 @@ spec:
     spec:
       containers:
         - name: demo-app
-          # Build & push app/Dockerfile to your registry (e.g. ECR) and
-          # point this at that image. Placeholder shown below.
           image: <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/sre-takehome-demo-app:latest
           ports:
             - containerPort: 8080
